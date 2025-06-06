@@ -1,0 +1,2 @@
+add_subdirectory(arl_api)
+add_subdirectory(arl_cli)
