@@ -3,6 +3,7 @@ project(ARL CXX C)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
+add_subdirectory(submodules)
 add_subdirectory(source)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
