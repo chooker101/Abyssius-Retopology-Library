@@ -5,3 +5,6 @@
 	path = submodules/godot-cpp
 	url = https://github.com/godotengine/godot-cpp.git
 	branch = 4.3
+[submodule "submodules/OpenImageIO"]
+	path = submodules/OpenImageIO
+	url = https://github.com/AcademySoftwareFoundation/OpenImageIO.git
