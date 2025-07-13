@@ -3,6 +3,8 @@ project(ARL CXX C)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
+set(CMAKE_CXX_STANDARD 17)
+
 add_subdirectory(submodules)
 add_subdirectory(source)
 

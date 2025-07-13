@@ -76,26 +76,26 @@ float& arl_api::Vector2::operator[](uint32_t i)
 
 std::ostream& arl_api::operator<<(std::ostream& os, const Vertex& obj)
 {
-	os << obj.position.x;
-	os << obj.position.y;
-	os << obj.position.z;
-	os << obj.normal.x;
-	os << obj.normal.y;
-	os << obj.normal.z;
-	os << obj.uvcoord.x;
-	os << obj.uvcoord.y;
+	os.write(reinterpret_cast<const char *>(&obj.position.x), sizeof(float));
+	os.write(reinterpret_cast<const char*>(&obj.position.y), sizeof(float));
+	os.write(reinterpret_cast<const char*>(&obj.position.z), sizeof(float));
+	os.write(reinterpret_cast<const char*>(&obj.normal.x), sizeof(float));
+	os.write(reinterpret_cast<const char*>(&obj.normal.y), sizeof(float));
+	os.write(reinterpret_cast<const char*>(&obj.normal.z), sizeof(float));
+	os.write(reinterpret_cast<const char*>(&obj.uvcoord.x), sizeof(float));
+	os.write(reinterpret_cast<const char*>(&obj.uvcoord.y), sizeof(float));
 	return os;
 }
 
 std::istream& arl_api::operator>>(std::istream& is, Vertex& obj)
 {
-	is >> obj.position.x;
-	is >> obj.position.y;
-	is >> obj.position.z;
-	is >> obj.normal.x;
-	is >> obj.normal.y;
-	is >> obj.normal.z;
-	is >> obj.uvcoord.x;
-	is >> obj.uvcoord.y;
+	is.read(reinterpret_cast<char*>(&obj.position.x), sizeof(float));
+	is.read(reinterpret_cast<char*>(&obj.position.y), sizeof(float));
+	is.read(reinterpret_cast<char*>(&obj.position.z), sizeof(float));
+	is.read(reinterpret_cast<char*>(&obj.normal.x), sizeof(float));
+	is.read(reinterpret_cast<char*>(&obj.normal.y), sizeof(float));
+	is.read(reinterpret_cast<char*>(&obj.normal.z), sizeof(float));
+	is.read(reinterpret_cast<char*>(&obj.uvcoord.x), sizeof(float));
+	is.read(reinterpret_cast<char*>(&obj.uvcoord.y), sizeof(float));
 	return is;
 }

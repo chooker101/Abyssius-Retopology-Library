@@ -18,6 +18,7 @@ int main(int argc, char** argv) {
         std::vector<arl_api::Vertex> vBuffer(meshImport.GetVertexBuffer());
         stripBuilder.GenTriangleStripMesh(vBuffer, parser.GetMeshStride(), parser.GetMeshRows(), parser.GetMeshColumns());
         meshExport.ExportARLFile(parser.GetARLOutputPath(), stripBuilder.GetStripLength(), stripBuilder.GetVertexBuffer(), stripBuilder.GetIndexBuffer());
+        meshImport.LoadARLFile(parser.GetARLOutputPath());
     }
     return 0;
 }

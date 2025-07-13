@@ -49,17 +49,86 @@ namespace arl_api {
 		uint32_t iBufferSize = 0;
 
 		//Needs a lot of optimization
+		constexpr auto chunkSize = 4096;
 		if (file) {
-			file >> vBufferSize;
-			file >> iBufferSize;
-			file >> mTriangleStripLength;
+			std::vector<char> fileBuffer(chunkSize);
+			file.read(reinterpret_cast<char*>(&vBufferSize), sizeof(uint32_t));
+			file.read(reinterpret_cast<char*>(&iBufferSize), sizeof(uint32_t));
+			file.read(reinterpret_cast<char*>(&mTriangleStripLength), sizeof(uint32_t));
 			mVertexBuffer.resize(vBufferSize);
-			for (uint32_t i = 0; i < vBufferSize; ++i) {
-				file >> mVertexBuffer[i];
-			}
 			mIndexBuffer.resize(iBufferSize);
-			for (uint32_t i = 0; i < iBufferSize; ++i) {
-				file >> mIndexBuffer[i];
+			uint32_t vBufferIndex = 0;
+			uint32_t iBufferIndex = 0;
+			uint32_t overflowCount = 0;
+			constexpr auto vertexSize = sizeof(float) * 8;
+			std::vector<char> tempBuffer(vertexSize);
+			std::streamsize bytesRead;
+
+			while (true) {
+				file.read(fileBuffer.data(), chunkSize);
+				bytesRead = file.gcount();
+				for (uint32_t i = 0; i < bytesRead;) {
+					if (vBufferIndex < vBufferSize) {
+						if (i + vertexSize > bytesRead) {
+							while (i < bytesRead) {
+								tempBuffer[overflowCount] = fileBuffer[i];
+								++i;
+								++overflowCount;
+							}
+						}
+						else {
+							if (overflowCount != 0) {
+								while (overflowCount < vertexSize) {
+									tempBuffer[overflowCount] = fileBuffer[i];
+									++i;
+									++overflowCount;
+								}
+								mVertexBuffer[vBufferIndex] = Vertex(*reinterpret_cast<float*>(tempBuffer.data()), *reinterpret_cast<float*>(tempBuffer.data() + sizeof(float)), *reinterpret_cast<float*>(tempBuffer.data() + sizeof(float) * 2),
+																	*reinterpret_cast<float*>(tempBuffer.data() + sizeof(float) * 3), *reinterpret_cast<float*>(tempBuffer.data() + sizeof(float) * 4), *reinterpret_cast<float*>(tempBuffer.data() + sizeof(float) * 5),
+																	*reinterpret_cast<float*>(tempBuffer.data() + sizeof(float) * 6), *reinterpret_cast<float*>(tempBuffer.data() + sizeof(float) * 7));
+								overflowCount = 0;
+							}
+							else {
+								mVertexBuffer[vBufferIndex] = Vertex(*reinterpret_cast<float*>(fileBuffer.data() + i), *reinterpret_cast<float*>(fileBuffer.data() + i + sizeof(float)), *reinterpret_cast<float*>(fileBuffer.data() + i + sizeof(float) * 2),
+									*reinterpret_cast<float*>(fileBuffer.data() + i + sizeof(float) * 3), *reinterpret_cast<float*>(fileBuffer.data() + i + sizeof(float) * 4), *reinterpret_cast<float*>(fileBuffer.data() + i + sizeof(float) * 5),
+									*reinterpret_cast<float*>(fileBuffer.data() + i + sizeof(float) * 6), *reinterpret_cast<float*>(fileBuffer.data() + i + sizeof(float) * 7));
+								i += vertexSize;
+							}
+							++vBufferIndex;
+						}
+					}
+					else if (iBufferIndex < iBufferSize) {
+						if (i + sizeof(uint32_t) > bytesRead && bytesRead >= chunkSize) {
+							while (i < bytesRead) {
+								tempBuffer[overflowCount] = fileBuffer[i];
+								++i;
+								++overflowCount;
+							}
+						}
+						else {
+							if (overflowCount != 0) {
+								while (overflowCount < sizeof(uint32_t)) {
+									tempBuffer[overflowCount] = fileBuffer[i];
+									++i;
+									++overflowCount;
+								}
+								mIndexBuffer[iBufferIndex] = *reinterpret_cast<uint32_t*>(tempBuffer.data());
+								overflowCount = 0;
+							}
+							else {
+								mIndexBuffer[iBufferIndex] = *reinterpret_cast<uint32_t*>(fileBuffer.data() + i);
+								i += sizeof(uint32_t);
+							}
+							++iBufferIndex;
+						}
+					}
+					else {
+						++i;
+					}
+				}
+				if (bytesRead < chunkSize) {
+					break;
+				}
 			}
 			mIsMeshLoaded = true;
 		}
